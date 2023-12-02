@@ -1,36 +1,38 @@
 import { useDispatch, useSelector } from 'react-redux';
-const SetPomodoro = ({ type, time, action}) => {
+import ToggleTimerButton from './ToggleTimerButton';
+import { toggleDisplayWorkTimer } from '../redux/slices/pomodoroSlice';
+const SetPomodoro = ({ type }) => {
 	const tailWindCssClass = {
-		button: 'bg-slate-200 rounded-sm flex justify-center items-center w-8 h-8 text-3xl text-black',
 		buttonGrpSpan: 'min-w-[60px] shrink-0 text-center text-xl font-bold',
 	};
 	const pomodoro = useSelector((state) => state.pomodoro);
 	const isWorkTimeDiplayed = pomodoro.isWorkTimeDisplayed;
 	const dispatch = useDispatch();
+	const value = pomodoro[type.toLowerCase()].value;
+	const valueInSecon = (value / 60)
 	const handleDisplay = () => {
-		(isWorkTimeDiplayed && type === 'Breaks' ) && dispatch(action.toggleDisplayWorkTimer(false));
-        (!isWorkTimeDiplayed && type === 'Sessions') && dispatch(action.toggleDisplayWorkTimer(true));
+		if (!pomodoro.isPomodoroStarted) {
+			isWorkTimeDiplayed &&
+				type === 'Pause' &&
+				dispatch(toggleDisplayWorkTimer(false));
+			!isWorkTimeDiplayed &&
+				type === 'Session' &&
+				dispatch(toggleDisplayWorkTimer(true));
+		}
 	};
 
 	return (
-		<div className="flex flex-col gap-1 items-center cursor-pointer" onClick={handleDisplay}>
+		<div
+			className="flex flex-col gap-1 items-center cursor-pointer"
+			onClick={handleDisplay}
+		>
 			<p>{type}</p>
 			<div className="flex justify-center">
-				<button
-					onClick={() => dispatch(action.decrement())}
-					className={`${tailWindCssClass.button}`}
-				>
-					-
-				</button>
-				<span className={`${tailWindCssClass.buttonGrpSpan}`}>
-					{time}
+				<ToggleTimerButton type={type} action={'-'} />
+				<span className={`${tailWindCssClass.buttonGrpSpan} select-none`}>
+					{valueInSecon}
 				</span>
-				<button
-					onClick={() => dispatch(action.increment())}
-					className={`${tailWindCssClass.button}`}
-				>
-					+
-				</button>
+				<ToggleTimerButton type={type} action={'+'} />
 			</div>
 		</div>
 	);
